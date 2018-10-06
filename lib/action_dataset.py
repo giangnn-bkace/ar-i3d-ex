@@ -17,7 +17,7 @@ class Action_Dataset:
         # Edited by Alex Hu
         np.random.shuffle(self.perm)
 
-    def next_batch(self, batch_size, frame_num, shuffle=True, data_augment=True):
+    def next_batch(self, batch_size, frame_num, shuffle=False, data_augment=True):
         # used for counting the number of epoches,
         # end is current number of the total processed videos
         # index_in_epoch is the index of this epoch

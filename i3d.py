@@ -114,7 +114,7 @@ class InceptionI3d(snt.AbstractModule):
       'Predictions',
   )
 
-  def __init__(self, num_classes=400, spatial_squeeze=True,
+  def __init__(self, num_classes=600, spatial_squeeze=True,
                final_endpoint='Logits', name='inception_i3d'):
     """Initializes I3D model instance.
 

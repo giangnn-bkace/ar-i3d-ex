@@ -39,7 +39,7 @@ class Video_3D:
         #combine all frames
         for i in range(start, start+frame_num):
             frames.extend(self.load_img((i-1)%self.total_frame_num+1))
-        frames = transform_data(frames, crop_size=side_length, random_crop=data_augment, random_flip=data_augment)
+        frames = transform_data(frames, crop_size=side_length, random_crop=False, random_flip=data_augment)
         
 #?? what is the meaning of is_numpy
         if is_numpy:

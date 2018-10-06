@@ -15,18 +15,18 @@ from lib.action_dataset import Action_Dataset
 from lib.action_dataset import split_data
 
 _BATCH_SIZE = 6
-_CLIP_SIZE = 16
+_CLIP_SIZE = 8
 # How many frames are used for each video in testing phase
-_EACH_VIDEO_TEST_SIZE = 16
+
 _FRAME_SIZE = 224
 _LEARNING_RATE = 0.001
 _GLOBAL_EPOCH = 70
 _PREFETCH_BUFFER_SIZE = 30
-_NUM_PARALLEL_CALLS = 1
+_NUM_PARALLEL_CALLS = 4
 _SAVER_MAX_TO_KEEP = 1000
 _WEIGHT_OF_LOSS_WEIGHT = 7e-7
 _MOMENTUM = 0.9
-_DROPOUT = 0.36
+_DROPOUT = 0.5
 _OUTPUT_STEP = 2000
 # When the accuracy on training data higher than this value, run testing phase
 _RUN_TEST_THRESH = 0.85
@@ -39,6 +39,7 @@ _CHECKPOINT_PATHS = {
     'flow': './data/checkpoints/flow_scratch/model.ckpt',
     'rgb_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
     'flow_imagenet': './data/checkpoints/flow_imagenet/model.ckpt',
+    'rgb_kin600': './data/checkpoints/rgb_kin600/model.ckpt'
 }
 
 _CHANNEL = {
@@ -70,7 +71,7 @@ def process_video(data_info, name, mode, is_training=True):
         clip_seq, label_seq = data.next_batch(1, _CLIP_SIZE)
     else:
         clip_seq, label_seq = data.next_batch(
-            1, _EACH_VIDEO_TEST_SIZE+1, shuffle=False, data_augment=False)
+            1, _CLIP_SIZE, shuffle=False, data_augment=False)
     clip_seq = 2*(clip_seq/255) - 1
     clip_seq = np.array(clip_seq, dtype='float32')
     return clip_seq, label_seq
@@ -149,7 +150,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     with tf.variable_scope(_SCOPE[train_data.mode]):
         # insert i3d model
         model = i3d.InceptionI3d(
-            400, spatial_squeeze=True, final_endpoint='Logits')
+            600, spatial_squeeze=True, final_endpoint='Logits')
         # the line below outputs the final results with logits
         # __call__ uses _template, and _template uses _build when defined
         logits, _ = model(clip_holder, is_training=is_train_holder,
@@ -167,10 +168,12 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     for variable in tf.global_variables():
         tmp = variable.name.split('/')
         if tmp[0] == _SCOPE[train_data.mode] and 'dense' not in tmp[1]:
-            variable_map[variable.name.replace(':0', '')] = variable
+            variable_map[variable.name.replace(':0', '')[len('RGB/inception_i3d/'):]] = variable
+            #variable_map[variable.name.replace(':0', '')] = variable
         if tmp[-1] == 'w:0' or tmp[-1] == 'kernel:0':
             weight_l2 = tf.nn.l2_loss(variable)
             tf.add_to_collection('weight_l2', weight_l2)
+
     loss_weight = tf.add_n(tf.get_collection('weight_l2'), 'loss_weight')
     loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(
         labels=label_holder, logits=fc_out))
@@ -193,10 +196,11 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     # Set learning rate schedule by hand, also you can use an auto way
     boundaries = [10000, 20000, 30000, 40000, 50000]
     values = [_LEARNING_RATE, 0.0008, 0.0005, 0.0003, 0.0001, 5e-5]
+    values[:]=[x/2 for x in values]
     learning_rate = tf.train.piecewise_constant(
         global_index, boundaries, values)
     
-	tf.summary.scalar('learning_rate', learning_rate)
+    tf.summary.scalar('learning_rate', learning_rate)
 
     # Optimizer set-up
     # FOR BATCH norm, we then use this updata_ops
@@ -219,12 +223,10 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     print('Output wirtes to ' + log_dir)
     # logging.info('----Here we start!----')
     step = 0
-    # for one epoch
+    
     true_count = 0
-    # for 20 batches
-    tmp_count = 0
-    accuracy_tmp = 0
     epoch_completed = 0
+    
     while step <= global_step:
         step += 1
         #start_time = time.time()
@@ -232,25 +234,17 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
             [optimizer, total_loss, loss_weight, is_in_top_1_op, merged_summary],
             feed_dict={dropout_holder: _DROPOUT, is_train_holder: True})
         #duration = time.time() - start_time
-		if investigate == 1:
-			tmp = np.sum(is_in_top_1)
-			true_count += tmp
-			tmp_count += tmp
+        if investigate == 1:
+            tmp = np.sum(is_in_top_1)
+            true_count += tmp
+        
         train_writer.add_summary(summary, step)
-        # responsible for printing relevant results
-        '''if step % _OUTPUT_STEP == 0:
-            accuracy = tmp_count / (_OUTPUT_STEP * _BATCH_SIZE)
-            print('step: %-4d, loss: %-.4f, accuracy: %.3f (%.2f sec/batch)' %
-                  (step, loss_now, accuracy, float(duration)))
-            logging.info('step: % -4d, loss: % -.4f,\
-                             accuracy: % .3f ( % .2f sec/batch)' %
-                         (step, loss_now, accuracy, float(duration)))
-            tmp_count = 0'''
+        
         if step % per_epoch_step == 0:
             epoch_completed += 1
-			if investigate == 1:
-				train_ accuracy = true_count / (per_epoch_step * _BATCH_SIZE)
-				true_count = 0
+            if investigate == 1:
+                train_accuracy = true_count / (per_epoch_step * _BATCH_SIZE)
+                true_count = 0
             
                 sess.run(test_init_op)
                 true_count = 0
@@ -271,8 +265,8 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
                 if (epoch_completed < _GLOBAL_EPOCH):
                     saver2.save(sess, os.path.join(log_dir, test_data.name+'_'+train_data.mode), epoch_completed)
                 sess.run(train_init_op)
-			if epoch_completed >= _GLOBAL_EPOCH:
-				saver2.save(sess, os.path.join(log_dir, test_data.name+'_'+train_data.mode), epoch_completed)
+            if epoch_completed >= _GLOBAL_EPOCH:
+                saver2.save(sess, os.path.join(log_dir, test_data.name+'_'+train_data.mode), epoch_completed)
     train_writer.close()
     sess.close()
 
@@ -284,5 +278,5 @@ if __name__ == '__main__':
     p.add_argument('dataset', type=str, help="name of dataset, e.g., ucf101")
     p.add_argument('mode', type=str, help="type of data, e.g., rgb")
     p.add_argument('split', type=int, help="split of data, e.g., 1")
-	p.add_argument('investigate', type=int, help="0-no 1-yes")
+    p.add_argument('investigate', type=int, help="0-no 1-yes")
     main(**vars(p.parse_args()))
