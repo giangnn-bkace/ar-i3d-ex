@@ -19,7 +19,7 @@ _CLIP_SIZE = 16
 # How many frames are used for each video in testing phase
 
 _FRAME_SIZE = 224
-_LEARNING_RATE = 0.001
+_LEARNING_RATE = 1e-4
 _GLOBAL_EPOCH = 70
 _PREFETCH_BUFFER_SIZE = 30
 _NUM_PARALLEL_CALLS = 4
