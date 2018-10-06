@@ -32,7 +32,7 @@ _OUTPUT_STEP = 2000
 _RUN_TEST_THRESH = 0.85
 # If the accuracy on testing data higher than this value, save the model
 _SAVE_MODEL_THRESH = 0.75
-_LOG_ROOT = 'output_momentum'
+_LOG_ROOT = 'output_momentum_8'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
@@ -168,8 +168,8 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     for variable in tf.global_variables():
         tmp = variable.name.split('/')
         if tmp[0] == _SCOPE[train_data.mode] and 'dense' not in tmp[1]:
-            variable_map[variable.name.replace(':0', '')[len('RGB/inception_i3d/'):]] = variable
-            #variable_map[variable.name.replace(':0', '')] = variable
+            #variable_map[variable.name.replace(':0', '')[len('RGB/inception_i3d/'):]] = variable
+            variable_map[variable.name.replace(':0', '')] = variable
         if tmp[-1] == 'w:0' or tmp[-1] == 'kernel:0':
             weight_l2 = tf.nn.l2_loss(variable)
             tf.add_to_collection('weight_l2', weight_l2)
