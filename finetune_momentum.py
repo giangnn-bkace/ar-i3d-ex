@@ -194,9 +194,8 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     global_index = tf.Variable(0, trainable=False)
 
     # Set learning rate schedule by hand, also you can use an auto way
-    boundaries = [per_epoch_step*5, per_epoch_step*10, per_epoch_step*15, per_epoch_step*20, per_epoch_step*30]
-    values = [_LEARNING_RATE, 0.0008, 0.0005, 0.0003, 0.0001, 5e-5]
-    values[:]=[x/2 for x in values]
+    boundaries = [per_epoch_step*5, per_epoch_step*10, per_epoch_step*15, per_epoch_step*20, per_epoch_step*25]
+    values = [_LEARNING_RATE, _LEARNING_RATE/2, _LEARNING_RATE/4, _LEARNING_RATE/8, _LEARNING_RATE/16, _LEARNING_RATE/32]
     learning_rate = tf.train.piecewise_constant(
         global_index, boundaries, values)
     
@@ -230,8 +229,8 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     while step <= global_step:
         step += 1
         #start_time = time.time()
-        _, loss_now, loss_plus, is_in_top_1, summary = sess.run(
-            [optimizer, total_loss, loss_weight, is_in_top_1_op, merged_summary],
+        _, is_in_top_1, summary = sess.run(
+            [optimizer, is_in_top_1_op, merged_summary],
             feed_dict={dropout_holder: _DROPOUT, is_train_holder: True})
         #duration = time.time() - start_time
         if investigate == 1:
