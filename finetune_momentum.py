@@ -10,6 +10,8 @@ import logging
 import numpy as np
 import tensorflow as tf
 
+import time
+
 import i3d
 from lib.action_dataset import Action_Dataset
 from lib.action_dataset import split_data
@@ -21,8 +23,8 @@ _CLIP_SIZE = 16
 _FRAME_SIZE = 224
 _LEARNING_RATE = 5e-4
 _GLOBAL_EPOCH = 70
-_PREFETCH_BUFFER_SIZE = 30
-_NUM_PARALLEL_CALLS = 4
+_PREFETCH_BUFFER_SIZE = 50
+_NUM_PARALLEL_CALLS = 2
 _SAVER_MAX_TO_KEEP = 1000
 _WEIGHT_OF_LOSS_WEIGHT = 7e-7
 _MOMENTUM = 0.9
@@ -226,18 +228,20 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     true_count = 0
     epoch_completed = 0
     
+    start_time = time.time()
+    
     while step <= global_step:
         step += 1
         #start_time = time.time()
-        _, is_in_top_1, summary = sess.run(
-            [optimizer, is_in_top_1_op, merged_summary],
+        _, is_in_top_1 = sess.run(
+            [optimizer, is_in_top_1_op],
             feed_dict={dropout_holder: _DROPOUT, is_train_holder: True})
         #duration = time.time() - start_time
         if investigate == 1:
             tmp = np.sum(is_in_top_1)
             true_count += tmp
         
-        train_writer.add_summary(summary, step)
+        #train_writer.add_summary(summary, step)
         
         if step % per_epoch_step == 0:
             epoch_completed += 1
@@ -258,12 +262,13 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
                 true_count = 0
                 # to ensure every test procedure has the same test size
                 test_data.index_in_epoch = 0
-                print('Epoch%d - train: %.3f   test: %.3f' %(epoch_completed, train_accuracy, test_accuracy))
-                logging.info('Epoch%d,train,%.3f,test,%.3f' %(epoch_completed, train_accuracy, test_accuracy))
+                #print('Epoch%d - train: %.3f   test: %.3f   time: %d' %(epoch_completed, train_accuracy, test_accuracy, time.time() - start_time))
+                logging.info('Epoch%d,train,%.3f,test,%.3f   time: %d' %(epoch_completed, train_accuracy, test_accuracy, time.time() - start_time))
                 # saving the best params in test set
                 if (epoch_completed < _GLOBAL_EPOCH):
                     saver2.save(sess, os.path.join(log_dir, test_data.name+'_'+train_data.mode), epoch_completed)
                 sess.run(train_init_op)
+                start_time = time.time()
             if epoch_completed >= _GLOBAL_EPOCH:
                 saver2.save(sess, os.path.join(log_dir, test_data.name+'_'+train_data.mode), epoch_completed)
     train_writer.close()
