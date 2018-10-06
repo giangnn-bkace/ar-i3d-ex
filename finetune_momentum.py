@@ -32,7 +32,7 @@ _OUTPUT_STEP = 2000
 _RUN_TEST_THRESH = 0.85
 # If the accuracy on testing data higher than this value, save the model
 _SAVE_MODEL_THRESH = 0.75
-_LOG_ROOT = 'output_momentum_16'
+_LOG_ROOT = 'output_momentum_16_run-01'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
@@ -194,7 +194,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     global_index = tf.Variable(0, trainable=False)
 
     # Set learning rate schedule by hand, also you can use an auto way
-    boundaries = [10000, 20000, 30000, 40000, 50000]
+    boundaries = [per_epoch_step*5, per_epoch_step*10, per_epoch_step*15, per_epoch_step*20, per_epoch_step*30]
     values = [_LEARNING_RATE, 0.0008, 0.0005, 0.0003, 0.0001, 5e-5]
     values[:]=[x/2 for x in values]
     learning_rate = tf.train.piecewise_constant(
