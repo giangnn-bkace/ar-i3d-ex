@@ -150,7 +150,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     with tf.variable_scope(_SCOPE[train_data.mode]):
         # insert i3d model
         model = i3d.InceptionI3d(
-            600, spatial_squeeze=True, final_endpoint='Logits')
+            400, spatial_squeeze=True, final_endpoint='Logits')
         # the line below outputs the final results with logits
         # __call__ uses _template, and _template uses _build when defined
         logits, _ = model(clip_holder, is_training=is_train_holder,
