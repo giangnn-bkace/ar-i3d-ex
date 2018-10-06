@@ -15,7 +15,7 @@ from lib.action_dataset import Action_Dataset
 from lib.action_dataset import split_data
 
 _BATCH_SIZE = 6
-_CLIP_SIZE = 8
+_CLIP_SIZE = 16
 # How many frames are used for each video in testing phase
 
 _FRAME_SIZE = 224
@@ -32,7 +32,7 @@ _OUTPUT_STEP = 2000
 _RUN_TEST_THRESH = 0.85
 # If the accuracy on testing data higher than this value, save the model
 _SAVE_MODEL_THRESH = 0.75
-_LOG_ROOT = 'output_momentum_8'
+_LOG_ROOT = 'output_momentum_16'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
