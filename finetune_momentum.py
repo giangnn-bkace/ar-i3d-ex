@@ -262,7 +262,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
                 true_count = 0
                 # to ensure every test procedure has the same test size
                 test_data.index_in_epoch = 0
-                #print('Epoch%d - train: %.3f   test: %.3f   time: %d' %(epoch_completed, train_accuracy, test_accuracy, time.time() - start_time))
+                print('Epoch%d - train: %.3f   test: %.3f   time: %d' %(epoch_completed, train_accuracy, test_accuracy, time.time() - start_time))
                 logging.info('Epoch%d,train,%.3f,test,%.3f   time: %d' %(epoch_completed, train_accuracy, test_accuracy, time.time() - start_time))
                 # saving the best params in test set
                 if (epoch_completed < _GLOBAL_EPOCH):
