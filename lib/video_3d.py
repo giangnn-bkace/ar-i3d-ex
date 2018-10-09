@@ -38,7 +38,7 @@ class Video_3D:
         start = random.randint(1, max(self.total_frame_num-frame_num, 0)+1)
         #combine all frames
         for i in range(start, start+frame_num):
-            frames.extend(self.load_img((i)%self.total_frame_num+1))
+            frames.extend(self.load_img((i-1)%self.total_frame_num+1))
         if data_augment and random.randint(0,1) == 0:
             for i, img in enumerate(frames):
                 frames[i] = ImageOps.mirror(img)

@@ -63,35 +63,12 @@ def split_data(data_info, test_split):
     # for example, info is
     # v_ApplyEyeMakeup_g01_c01,/data4/zhouhao/dataset/ucf101/jpegs_256/v_ApplyEyeMakeup_g01_c01,165,0
     for line in f1.readlines():
+        #print(line)
         info = line.strip().split(',')
         if info[0] in test:
             test_info.append(info)
         else:
             train_info.append(info)
-        '''    if (info[3] == '0'):
-                for i in range(20):
-                    train_info.append(info)
-            elif (info[3] == '1'):
-                for i in range(3):
-                    train_info.append(info)
-            elif (info[3] == '2'):
-                for i in range(1):
-                    train_info.append(info)
-            elif (info[3] == '3'):
-                for i in range(2):
-                    train_info.append(info)
-            elif (info[3] == '4'):
-                for i in range(7):
-                    train_info.append(info)
-            elif (info[3] == '5'):
-                for i in range(3):
-                    train_info.append(info)
-            elif (info[3] == '6'):
-                for i in range(1):
-                    train_info.append(info)
-            elif (info[3] == '7'):
-                for i in range(4):
-                    train_info.append(info)'''
     f1.close()
     f2.close()
     print(len(train_info))
