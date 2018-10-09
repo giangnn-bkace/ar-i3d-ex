@@ -22,18 +22,12 @@ _CLIP_SIZE = 16
 
 _FRAME_SIZE = 224
 _LEARNING_RATE = 1e-3
-_GLOBAL_EPOCH = 70
-_PREFETCH_BUFFER_SIZE = 50
-_NUM_PARALLEL_CALLS = 2
-_SAVER_MAX_TO_KEEP = 1000
+_GLOBAL_EPOCH = 50
+_PREFETCH_BUFFER_SIZE = 30
+_NUM_PARALLEL_CALLS = 1
 _WEIGHT_OF_LOSS_WEIGHT = 7e-7
 _MOMENTUM = 0.9
 _DROPOUT = 0.5
-_OUTPUT_STEP = 2000
-# When the accuracy on training data higher than this value, run testing phase
-_RUN_TEST_THRESH = 0.85
-# If the accuracy on testing data higher than this value, save the model
-_SAVE_MODEL_THRESH = 0.75
 _LOG_ROOT = 'output_momentum_16_run-01'
 
 _CHECKPOINT_PATHS = {
@@ -80,57 +74,43 @@ def process_video(data_info, name, mode, is_training=True):
 
 
 def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
-    assert mode in ['rgb', 'flow'], 'Only RGB data and flow data is supported'
-    log_dir = os.path.join(_LOG_ROOT, 'finetune-%s-%s-%d' %
+    with tf.device('/cpu:0'):
+        assert mode in ['rgb', 'flow'], 'Only RGB data and flow data is supported'
+        log_dir = os.path.join(_LOG_ROOT, 'finetune-%s-%s-%d' %
                            (dataset, mode, split))
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-    logging.basicConfig(level=logging.INFO, filename=os.path.join(log_dir, 'log.txt'),
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        logging.basicConfig(level=logging.INFO, filename=os.path.join(log_dir, 'log.txt'),
                         filemode='w', format='%(message)s')
 
     ##  Data Preload  ###
-    train_info, test_info = split_data(
-        os.path.join('./data', dataset, mode+'.csv'),
-        os.path.join('./data', dataset, 'testlist%02d' % split+'.txt'))
-#        os.path.join('/data1/yunfeng/i3d_test/data', dataset, mode+'.txt'),
-#        os.path.join('/data1/yunfeng/i3d_test/data', dataset, 'testlist%02d' % split+'.txt'))
-    train_data = Action_Dataset(dataset, mode, train_info)
-    test_data = Action_Dataset(dataset, mode, test_info)
+        train_info, test_info = split_data(
+            os.path.join('./data', dataset, mode+'.csv'),
+            os.path.join('./data', dataset, 'testlist%02d' % split+'.txt'))
+        train_data = Action_Dataset(dataset, mode, train_info)
+        test_data = Action_Dataset(dataset, mode, test_info)
     
     
     
-    num_train_sample = len(train_info)
-    # Every element in train_info is shown as below:
-    # ['v_ApplyEyeMakeup_g08_c01',
-    # '/data4/zhouhao/dataset/ucf101/jpegs_256/v_ApplyEyeMakeup_g08_c01',
-    # '121', '0']
-    train_info_tensor = tf.constant(train_info)
-    test_info_tensor = tf.constant(test_info)
+        num_train_sample = len(train_info)
+        train_info_tensor = tf.constant(train_info)
+        test_info_tensor = tf.constant(test_info)
 
-    # Dataset building
-    # Phase 1 Trainning
-    # one element in this dataset is (train_info list)
-    train_info_dataset = tf.data.Dataset.from_tensor_slices(
-        (train_info_tensor))
-    # one element in this dataset is (single image_postprocess, single label)
-    # one element in this dataset is (batch image_postprocess, batch label)
-    train_info_dataset = train_info_dataset.shuffle(
-        buffer_size=num_train_sample)
-    train_dataset = train_info_dataset.map(lambda x: _get_data_label_from_info(
-        x, dataset, mode), num_parallel_calls=_NUM_PARALLEL_CALLS)
-    train_dataset = train_dataset.repeat().batch(_BATCH_SIZE)
-    train_dataset = train_dataset.prefetch(buffer_size=_PREFETCH_BUFFER_SIZE)
+        train_info_dataset = tf.data.Dataset.from_tensor_slices(
+            (train_info_tensor))
+        train_info_dataset = train_info_dataset.shuffle(
+            buffer_size=num_train_sample)
+        train_dataset = train_info_dataset.map(lambda x: _get_data_label_from_info(
+            x, dataset, mode), num_parallel_calls=_NUM_PARALLEL_CALLS)
+        train_dataset = train_dataset.repeat().batch(_BATCH_SIZE)
+        train_dataset = train_dataset.prefetch(buffer_size=_PREFETCH_BUFFER_SIZE)
 
-    # Phase 2 Testing
-    # one element in this dataset is (train_info list)
-    test_info_dataset = tf.data.Dataset.from_tensor_slices(
-        (test_info_tensor))
-    # one element in this dataset is (single image_postprocess, single label)
-    test_dataset = test_info_dataset.map(lambda x: _get_data_label_from_info(
-        x, dataset, mode), num_parallel_calls=_NUM_PARALLEL_CALLS)
-    # one element in this dataset is (batch image_postprocess, batch label)
-    test_dataset = test_dataset.batch(1).repeat()
-    test_dataset = test_dataset.prefetch(buffer_size=_PREFETCH_BUFFER_SIZE)
+        test_info_dataset = tf.data.Dataset.from_tensor_slices(
+            (test_info_tensor))
+        test_dataset = test_info_dataset.map(lambda x: _get_data_label_from_info(
+            x, dataset, mode), num_parallel_calls=_NUM_PARALLEL_CALLS)
+        test_dataset = test_dataset.batch(1).repeat()
+        test_dataset = test_dataset.prefetch(buffer_size=_PREFETCH_BUFFER_SIZE)
 
     # iterator = dataset.make_one_shot_iterator()
     # clip_holder, label_holder = iterator.get_next()
@@ -180,13 +160,13 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(
         labels=label_holder, logits=fc_out))
     total_loss = loss + _WEIGHT_OF_LOSS_WEIGHT * loss_weight
-    tf.summary.scalar('loss', loss)
-    tf.summary.scalar('loss_weight', loss_weight)
-    tf.summary.scalar('total_loss', total_loss)
+    #tf.summary.scalar('loss', loss)
+    #tf.summary.scalar('loss_weight', loss_weight)
+    #tf.summary.scalar('total_loss', total_loss)
 
     # Import Pre-trainned model
     saver = tf.train.Saver(var_list=variable_map, reshape=True)
-    saver2 = tf.train.Saver(max_to_keep=_SAVER_MAX_TO_KEEP)
+    saver2 = tf.train.Saver(max_to_keep=9999)
     # Specific Hyperparams
     # steps for training: the number of steps on batch per epoch
     per_epoch_step = int(np.ceil(train_data.size/_BATCH_SIZE))
@@ -201,7 +181,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     learning_rate = tf.train.piecewise_constant(
         global_index, boundaries, values)
     
-    tf.summary.scalar('learning_rate', learning_rate)
+    #tf.summary.scalar('learning_rate', learning_rate)
 
     # Optimizer set-up
     # FOR BATCH norm, we then use this updata_ops
@@ -214,8 +194,8 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(total_loss, global_step=global_index)
     '''
     sess = tf.Session()
-    merged_summary = tf.summary.merge_all()
-    train_writer = tf.summary.FileWriter(log_dir, sess.graph)
+    #merged_summary = tf.summary.merge_all()
+    #train_writer = tf.summary.FileWriter(log_dir, sess.graph)
     sess.run(tf.global_variables_initializer())
     sess.run(train_init_op)
     saver.restore(sess, _CHECKPOINT_PATHS[train_data.mode+'_imagenet'])
@@ -271,7 +251,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
                 start_time = time.time()
             if epoch_completed >= _GLOBAL_EPOCH:
                 saver2.save(sess, os.path.join(log_dir, test_data.name+'_'+train_data.mode), epoch_completed)
-    train_writer.close()
+    #train_writer.close()
     sess.close()
 
 
