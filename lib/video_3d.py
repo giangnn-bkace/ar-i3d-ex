@@ -6,6 +6,7 @@ from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 from PIL import Image
+from PIL import ImageOps
 
 #from lib.data_augment import transform_data
 
