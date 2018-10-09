@@ -21,7 +21,7 @@ _CLIP_SIZE = 16
 # How many frames are used for each video in testing phase
 
 _FRAME_SIZE = 224
-_LEARNING_RATE = 5e-4
+_LEARNING_RATE = 1e-3
 _GLOBAL_EPOCH = 70
 _PREFETCH_BUFFER_SIZE = 50
 _NUM_PARALLEL_CALLS = 2
@@ -196,8 +196,8 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     global_index = tf.Variable(0, trainable=False)
 
     # Set learning rate schedule by hand, also you can use an auto way
-    boundaries = [per_epoch_step*5, per_epoch_step*10, per_epoch_step*15]
-    values = [_LEARNING_RATE, _LEARNING_RATE/2, _LEARNING_RATE/4, _LEARNING_RATE/8]
+    boundaries = [per_epoch_step*5, per_epoch_step*10, per_epoch_step*15, per_epoch_step*20, per_epoch_step*25 ]
+    values = [_LEARNING_RATE, 8e-4, 5e-4, 3e-4, 1e-4, 5e-5]
     learning_rate = tf.train.piecewise_constant(
         global_index, boundaries, values)
     
