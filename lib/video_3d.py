@@ -7,7 +7,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 from PIL import Image
 
-from lib.data_augment import transform_data
+#from lib.data_augment import transform_data
 
 
 class Video_3D:
@@ -39,10 +39,10 @@ class Video_3D:
         #combine all frames
         for i in range(start, start+frame_num):
             frames.extend(self.load_img((i-1)%self.total_frame_num+1))
+        if data_augment and random.randint(0,1) == 0:
+            for i, img in enumerate(frames):
+                frames[i] = ImageOps.mirror(img)
         #frames = transform_data(frames, crop_size=side_length, random_crop=False, random_flip=data_augment)
-		if data_augment and random.randint(0,1) == 0:
-			for i, img in enumerate(frames):
-				frames[i] = ImageOps.mirror(img)
         
 #?? what is the meaning of is_numpy
         if is_numpy:
