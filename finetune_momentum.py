@@ -22,13 +22,12 @@ _CLIP_SIZE = 16
 
 _FRAME_SIZE = 224
 _LEARNING_RATE = 1e-3
-_GLOBAL_EPOCH = 30
 _PREFETCH_BUFFER_SIZE = 30
 _NUM_PARALLEL_CALLS = 2
 _WEIGHT_OF_LOSS_WEIGHT = 7e-7
 _MOMENTUM = 0.9
 _DROPOUT = 0.5
-_LOG_ROOT = 'output_momentum_16_run-01'
+_LOG_ROOT = 'output_momentum_16_run-02'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
@@ -55,8 +54,9 @@ _CLASS_NUM = {
 
 def _get_data_label_from_info(train_info_tensor, name, mode):
     """ Wrapper for `tf.py_func`, get video clip and label from info list."""
-    clip_holder, label_holder = tf.py_func(
-        process_video, [train_info_tensor, name, mode], [tf.float32, tf.int32])
+    with tf.device('/cpu:0'):
+        clip_holder, label_holder = tf.py_func(
+            process_video, [train_info_tensor, name, mode], [tf.float32, tf.int32])
     return clip_holder, label_holder
 
 
@@ -74,43 +74,39 @@ def process_video(data_info, name, mode, is_training=True):
 
 
 def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
-    with tf.device('/cpu:0'):
-        assert mode in ['rgb', 'flow'], 'Only RGB data and flow data is supported'
-        log_dir = os.path.join(_LOG_ROOT, 'finetune-%s-%s-%d' %
+    assert mode in ['rgb', 'flow'], 'Only RGB data and flow data is supported'
+    log_dir = os.path.join(_LOG_ROOT, 'finetune-%s-%s-%d' %
                            (dataset, mode, split))
-        if not os.path.exists(log_dir):
-            os.makedirs(log_dir)
-        logging.basicConfig(level=logging.INFO, filename=os.path.join(log_dir, 'log.txt'),
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    logging.basicConfig(level=logging.INFO, filename=os.path.join(log_dir, 'log.txt'),
                         filemode='w', format='%(message)s')
 
     ##  Data Preload  ###
-        train_info, test_info = split_data(
+    train_info, test_info = split_data(
             os.path.join('./data', dataset, mode+'.csv'),
             os.path.join('./data', dataset, 'testlist%02d' % split+'.txt'))
-        train_data = Action_Dataset(dataset, mode, train_info)
-        test_data = Action_Dataset(dataset, mode, test_info)
+    train_data = Action_Dataset(dataset, mode, train_info)
+    test_data = Action_Dataset(dataset, mode, test_info)
     
     
     
-        num_train_sample = len(train_info)
-        train_info_tensor = tf.constant(train_info)
-        test_info_tensor = tf.constant(test_info)
+    num_train_sample = len(train_info)
+    train_info_tensor = tf.constant(train_info)
+    test_info_tensor = tf.constant(test_info)
 
-        train_info_dataset = tf.data.Dataset.from_tensor_slices(
-            (train_info_tensor))
-        train_info_dataset = train_info_dataset.shuffle(
-            buffer_size=num_train_sample)
-        train_dataset = train_info_dataset.map(lambda x: _get_data_label_from_info(
+    train_info_dataset = tf.data.Dataset.from_tensor_slices((train_info_tensor))
+    train_info_dataset = train_info_dataset.shuffle(buffer_size=num_train_sample)
+    train_dataset = train_info_dataset.map(lambda x: _get_data_label_from_info(
             x, dataset, mode), num_parallel_calls=_NUM_PARALLEL_CALLS)
-        train_dataset = train_dataset.repeat().batch(_BATCH_SIZE)
-        train_dataset = train_dataset.prefetch(buffer_size=_PREFETCH_BUFFER_SIZE)
+    train_dataset = train_dataset.repeat().batch(_BATCH_SIZE)
+    train_dataset = train_dataset.prefetch(buffer_size=_PREFETCH_BUFFER_SIZE)
 
-        test_info_dataset = tf.data.Dataset.from_tensor_slices(
-            (test_info_tensor))
-        test_dataset = test_info_dataset.map(lambda x: _get_data_label_from_info(
+    test_info_dataset = tf.data.Dataset.from_tensor_slices((test_info_tensor))
+    test_dataset = test_info_dataset.map(lambda x: _get_data_label_from_info(
             x, dataset, mode), num_parallel_calls=_NUM_PARALLEL_CALLS)
-        test_dataset = test_dataset.batch(1).repeat()
-        test_dataset = test_dataset.prefetch(buffer_size=_PREFETCH_BUFFER_SIZE)
+    test_dataset = test_dataset.batch(1).repeat()
+    test_dataset = test_dataset.prefetch(buffer_size=_PREFETCH_BUFFER_SIZE)
 
     # iterator = dataset.make_one_shot_iterator()
     # clip_holder, label_holder = iterator.get_next()
@@ -171,12 +167,17 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     # steps for training: the number of steps on batch per epoch
     per_epoch_step = int(np.ceil(train_data.size/_BATCH_SIZE))
     # global step constant
+    if mode == 'flow':
+        _GLOBAL_EPOCH = 50
+        boundaries = [per_epoch_step*10, per_epoch_step*15, per_epoch_step*20, per_epoch_step*25, per_epoch_step*30 ]
+    else:
+        _GLOBAL_EPOCH = 30
+        boundaries = [per_epoch_step*5, per_epoch_step*10, per_epoch_step*15, per_epoch_step*20, per_epoch_step*25 ]
     global_step = _GLOBAL_EPOCH * per_epoch_step
     # global step counting
     global_index = tf.Variable(0, trainable=False)
 
     # Set learning rate schedule by hand, also you can use an auto way
-    boundaries = [per_epoch_step*5, per_epoch_step*10, per_epoch_step*15, per_epoch_step*20, per_epoch_step*25 ]
     values = [_LEARNING_RATE, 8e-4, 5e-4, 3e-4, 1e-4, 5e-5]
     learning_rate = tf.train.piecewise_constant(
         global_index, boundaries, values)
