@@ -21,13 +21,13 @@ _CLIP_SIZE = 16
 # How many frames are used for each video in testing phase
 
 _FRAME_SIZE = 224
-_LEARNING_RATE = 1e-3
+_LEARNING_RATE = 1e-2
 _PREFETCH_BUFFER_SIZE = 30
 _NUM_PARALLEL_CALLS = 2
 _WEIGHT_OF_LOSS_WEIGHT = 7e-7
 _MOMENTUM = 0.9
 _DROPOUT = 0.5
-_LOG_ROOT = 'output_momentum_16_run-02'
+_LOG_ROOT = 'output_momentum_16_run-03'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
