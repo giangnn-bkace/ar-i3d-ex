@@ -169,7 +169,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     # global step constant
     if mode == 'flow':
         _GLOBAL_EPOCH = 90
-        boundaries = [per_epoch_step*10, per_epoch_step*15, per_epoch_step*20, per_epoch_step*25, per_epoch_step*30 ]
+        boundaries = [10000,20000,30000,40000,50000 ]
     else:
         _GLOBAL_EPOCH = 30
         boundaries = [per_epoch_step*5, per_epoch_step*10, per_epoch_step*15, per_epoch_step*20, per_epoch_step*25 ]
