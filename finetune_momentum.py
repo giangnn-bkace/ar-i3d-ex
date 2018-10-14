@@ -27,7 +27,7 @@ _NUM_PARALLEL_CALLS = 2
 _WEIGHT_OF_LOSS_WEIGHT = 7e-7
 _MOMENTUM = 0.9
 _DROPOUT = 0.36
-_LOG_ROOT = 'output_momentum_16_run-03'
+_LOG_ROOT = 'output_momentum_16_run-01'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
@@ -64,7 +64,7 @@ def process_video(data_info, name, mode, is_training=True):
     """ Get video clip and label from data info list."""
     data = Action_Dataset(name, mode, [data_info])
     if is_training:
-        clip_seq, label_seq = data.next_batch(1, _CLIP_SIZE)
+        clip_seq, label_seq = data.next_batch(1, _CLIP_SIZE, shuffle=True, data_augment=True)
     else:
         clip_seq, label_seq = data.next_batch(
             1, _CLIP_SIZE, shuffle=False, data_augment=False)

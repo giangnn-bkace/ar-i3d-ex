@@ -8,7 +8,6 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 from PIL import Image
 from PIL import ImageOps
 
-#from lib.data_augment import transform_data
 
 
 class Video_3D:
@@ -43,7 +42,7 @@ class Video_3D:
         if data_augment and random.randint(0,1) == 0:
             for i, img in enumerate(frames):
                 frames[i] = ImageOps.mirror(img)
-        #frames = transform_data(frames, crop_size=side_length, random_crop=False, random_flip=data_augment)
+        
         
 #?? what is the meaning of is_numpy
         if is_numpy:
@@ -60,7 +59,30 @@ class Video_3D:
 
         return  frames
 
-
+    def get_frame_at(self, frame_num, start=1, sample=1, data_augment=False, random_start=False, side_length=224):
+        '''
+            return:
+                frame_num * height * width * channel (rgb:3 , flow:2) 
+        '''
+        #assert frame_num <= self.total_frame_num
+        start = start - 1
+        #print('name: %s %d' % {self.name, start})
+        if random_start:
+            start = np.random.randint(max(self.total_frame_num-(frame_num-1)*sample, 1))
+        frames = []
+        for i in range(start, start+frame_num*sample, sample):
+            frames.extend(self.load_img(i % self.total_frame_num + 1))
+        frames = transform_data(frames, crop_size=side_length, random_crop=data_augment, random_flip=data_augment)
+        frames_np = []
+        if self.tag == 'rgb':
+            for img in frames:
+                frames_np.append(np.asarray(img))
+        elif self.tag == 'flow':
+            for i in range(0, len(frames), 2):
+                tmp = np.stack([np.asarray(frames[i]), np.asarray(frames[i+1])], axis=2)
+                frames_np.append(tmp)
+        return frames_np
+        
     def load_img(self, index):
         img_dir = self.path.decode('utf-8')
         if self.tag == b'rgb':

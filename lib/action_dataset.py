@@ -1,7 +1,6 @@
 import numpy as np
 from lib.video_3d import Video_3D
 import os
-import pandas as pd
 
 class Action_Dataset:
     def __init__(self, name, mode, video_info):
@@ -17,7 +16,7 @@ class Action_Dataset:
         # Edited by Alex Hu
         np.random.shuffle(self.perm)
 
-    def next_batch(self, batch_size, frame_num, shuffle=False, data_augment=True):
+    def next_batch(self, batch_size, frame_num, shuffle=True, data_augment=True):
         # used for counting the number of epoches,
         # end is current number of the total processed videos
         # index_in_epoch is the index of this epoch
@@ -47,7 +46,19 @@ class Action_Dataset:
                     self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment))
                 label.append(self.videos[self.perm[i]].label)
         return np.stack(batch), np.stack(label)
-
+    
+    def get_element(self, start_frame, frame_num, shuffle=False, data_augment=False):
+        # used for counting the number of epoches,
+        # end is current number of the total processed videos
+        # index_in_epoch is the index of this epoch
+        start = start_frame
+        frames = []
+        label = []
+        #print(type(self.mode))
+        #print(self.mode)
+        frames.append(self.videos[self.perm[i]].get_frames_at(frame_num, start, data_augment=data_augment))
+        label.append(self.videos[self.perm[i]].label)
+        return np.stack(frames), np.stack(label)
 
 def split_data(data_info, test_split):
     f1 = open(data_info, 'r')
@@ -63,7 +74,6 @@ def split_data(data_info, test_split):
     # for example, info is
     # v_ApplyEyeMakeup_g01_c01,/data4/zhouhao/dataset/ucf101/jpegs_256/v_ApplyEyeMakeup_g01_c01,165,0
     for line in f1.readlines():
-        #print(line)
         info = line.strip().split(',')
         if info[0] in test:
             test_info.append(info)
@@ -71,5 +81,35 @@ def split_data(data_info, test_split):
             train_info.append(info)
     f1.close()
     f2.close()
-    print(len(train_info))
     return train_info, test_info
+
+def get_each_frame_test_info(data_info, test_split, mode):
+    f1 = open(data_info, 'r')
+    f2 = open(test_split, 'r')
+    test = list()
+    test_info = list()
+    # extract the specific video name,and plus a document name behind,the result is such v_ApplyEyeMakeup_g01_c01
+    for line in f2.readlines():
+        test.append(line.split(os.path.sep)[1].split('.')[0])
+    
+    # if rgb's doc name is in testlist,then append in test_info,if not, append in train
+    # for example, info is
+    # v_ApplyEyeMakeup_g01_c01,/data4/zhouhao/dataset/ucf101/jpegs_256/v_ApplyEyeMakeup_g01_c01,165,0
+    for line in f1.readlines():
+        info = line.strip().split(',')
+        if info[0] in test:
+            if mode == 'flow':
+                num_frame = int(info[2]) + 1
+            else:
+                num_frame = int(info[2])
+            for i in range(num_frame):
+                temp_info = info.copy()
+                if mode == 'rgb':
+                    temp_info.append(str(i+1))
+                else:
+                    temp_info.append(str(i))
+                test_info.append(temp_info)
+            
+    f1.close()
+    f2.close()
+    return test_info
