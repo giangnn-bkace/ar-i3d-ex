@@ -171,7 +171,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
         boundaries = [10000, 20000, 30000, 40000, 50000 ]
         values = [1e-3, 8e-4, 5e-4, 3e-4, 1e-4, 5e-5]
     else:
-        _GLOBAL_EPOCH = 90
+        _GLOBAL_EPOCH = 50
         boundaries = [10000, 20000, 30000, 40000, 50000 ]
         values = [1e-4, 8e-5, 5e-5, 3e-5, 1e-5, 5e-6]
     global_step = _GLOBAL_EPOCH * per_epoch_step
@@ -213,12 +213,12 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     
     while step <= global_step:
         step += 1
-        #start_time = time.time()
+        start_time = time.time()
         _, is_in_top_1 = sess.run(
             [optimizer, is_in_top_1_op],
             feed_dict={dropout_holder: _DROPOUT, is_train_holder: True})
         #duration = time.time() - start_time
-        if investigate == 1:
+        if (investigate == 1) or (epoch_completed == _GLOBAL_EPOCH-1):
             tmp = np.sum(is_in_top_1)
             true_count += tmp
         
@@ -226,7 +226,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
         
         if step % per_epoch_step == 0:
             epoch_completed += 1
-            if investigate == 1:
+            if (investigate == 1) or (epoch_completed == _GLOBAL_EPOCH):
                 train_accuracy = true_count / (per_epoch_step * _BATCH_SIZE)
                 true_count = 0
             
@@ -246,12 +246,11 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
                 print('Epoch%d - train: %.3f   test: %.3f   time: %d' %(epoch_completed, train_accuracy, test_accuracy, time.time() - start_time))
                 logging.info('Epoch%d,train,%.3f,test,%.3f   time: %d' %(epoch_completed, train_accuracy, test_accuracy, time.time() - start_time))
                 # saving the best params in test set
-                if (epoch_completed < _GLOBAL_EPOCH):
-                    saver2.save(sess, os.path.join(log_dir, test_data.name+'_'+train_data.mode), epoch_completed)
-                sess.run(train_init_op)
-                start_time = time.time()
-            if epoch_completed >= _GLOBAL_EPOCH:
                 saver2.save(sess, os.path.join(log_dir, test_data.name+'_'+train_data.mode), epoch_completed)
+                sess.run(train_init_op)
+			else:
+				print('Epoch%d - time: %d' %(epoch_completed, time.time() - start_time))
+                logging.info('Epoch%d time: %d' %(epoch_completed, time.time() - start_time))
     #train_writer.close()
     sess.close()
 
