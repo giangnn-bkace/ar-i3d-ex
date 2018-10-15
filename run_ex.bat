@@ -1,5 +1,5 @@
-python finetune_momentum.py clipped_data rgb 1 0
 python finetune_momentum.py clipped_data flow 1 0
+python finetune_momentum.py clipped_data rgb 1 0
 python finetune_momentum.py clipped_data rgb 2 0
 python finetune_momentum.py clipped_data flow 2 0
 python finetune_momentum.py clipped_data rgb 3 0
