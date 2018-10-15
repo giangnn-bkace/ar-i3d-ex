@@ -213,7 +213,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     
     while step <= global_step:
         step += 1
-        start_time = time.time()
+        #start_time = time.time()
         _, is_in_top_1 = sess.run(
             [optimizer, is_in_top_1_op],
             feed_dict={dropout_holder: _DROPOUT, is_train_holder: True})
@@ -251,6 +251,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
             else:
                 print('Epoch%d - time: %d' %(epoch_completed, time.time() - start_time))
                 logging.info('Epoch%d time: %d' %(epoch_completed, time.time() - start_time))
+		    start_time = time.time()
     #train_writer.close()
     sess.close()
 
