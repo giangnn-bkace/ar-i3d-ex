@@ -251,7 +251,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
             else:
                 print('Epoch%d - time: %d' %(epoch_completed, time.time() - start_time))
                 logging.info('Epoch%d time: %d' %(epoch_completed, time.time() - start_time))
-		    start_time = time.time()
+            start_time = time.time()
     #train_writer.close()
     sess.close()
 
