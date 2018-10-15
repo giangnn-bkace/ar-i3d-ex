@@ -169,11 +169,11 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     if mode == 'flow':
         _GLOBAL_EPOCH = 90
         boundaries = [10000, 20000, 30000, 40000, 50000 ]
-		values = [1e-3, 8e-4, 5e-4, 3e-4, 1e-4, 5e-5]
+        values = [1e-3, 8e-4, 5e-4, 3e-4, 1e-4, 5e-5]
     else:
         _GLOBAL_EPOCH = 90
         boundaries = [10000, 20000, 30000, 40000, 50000 ]
-		values = [1e-4, 8e-5, 5e-5, 3e-5, 1e-5, 5e-6]
+        values = [1e-4, 8e-5, 5e-5, 3e-5, 1e-5, 5e-6]
     global_step = _GLOBAL_EPOCH * per_epoch_step
     # global step counting
     global_index = tf.Variable(0, trainable=False)
