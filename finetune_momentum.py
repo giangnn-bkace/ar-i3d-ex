@@ -248,8 +248,8 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
                 # saving the best params in test set
                 saver2.save(sess, os.path.join(log_dir, test_data.name+'_'+train_data.mode), epoch_completed)
                 sess.run(train_init_op)
-			else:
-				print('Epoch%d - time: %d' %(epoch_completed, time.time() - start_time))
+            else:
+                print('Epoch%d - time: %d' %(epoch_completed, time.time() - start_time))
                 logging.info('Epoch%d time: %d' %(epoch_completed, time.time() - start_time))
     #train_writer.close()
     sess.close()
