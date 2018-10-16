@@ -59,20 +59,17 @@ class Video_3D:
 
         return  frames
 
-    def get_frame_at(self, frame_num, start=1, sample=1, data_augment=False, random_start=False, side_length=224):
+    def get_frame_at(self, frame_num, start=1, side_length=224):
         '''
             return:
                 frame_num * height * width * channel (rgb:3 , flow:2) 
         '''
         #assert frame_num <= self.total_frame_num
-        start = start - 1
         #print('name: %s %d' % {self.name, start})
-        if random_start:
-            start = np.random.randint(max(self.total_frame_num-(frame_num-1)*sample, 1))
-        frames = []
-        for i in range(start, start+frame_num*sample, sample):
-            frames.extend(self.load_img(i % self.total_frame_num + 1))
-        frames = transform_data(frames, crop_size=side_length, random_crop=data_augment, random_flip=data_augment)
+        frames = list()
+        for i in range(start, start+frame_num):
+            frames.extend(self.load_img((i-1)%self.total_frame_num+1))
+        frames = transform_data(frames, crop_size=side_length, random_crop=False, random_flip=False)
         frames_np = []
         if self.tag == 'rgb':
             for img in frames:

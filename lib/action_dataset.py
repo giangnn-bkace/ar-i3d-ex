@@ -98,16 +98,10 @@ def get_each_frame_test_info(data_info, test_split, mode):
     for line in f1.readlines():
         info = line.strip().split(',')
         if info[0] in test:
-            if mode == 'flow':
-                num_frame = int(info[2]) + 1
-            else:
-                num_frame = int(info[2])
+            num_frame = int(info[2])
             for i in range(num_frame):
                 temp_info = info.copy()
-                if mode == 'rgb':
-                    temp_info.append(str(i+1))
-                else:
-                    temp_info.append(str(i))
+                temp_info.append(str(i+1))
                 test_info.append(temp_info)
             
     f1.close()
