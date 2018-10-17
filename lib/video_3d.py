@@ -29,10 +29,11 @@ class Video_3D:
             self.label = info_list[3]
         else:
             self.label = int(info_list[3])
-        if isinstance(info_list[4], int):
-            self.start = info_list[4]
-        else:
-            self.start = int(info_list[4])
+        if len(info_list) > 4:
+            if isinstance(info_list[4], int):
+                self.start = info_list[4]
+            else:
+                self.start = int(info_list[4])
         self.tag = tag
         #img_format offer the standard name of pic
         self.img_format = img_format
