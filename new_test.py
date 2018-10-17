@@ -9,7 +9,7 @@ import logging
 
 import numpy as np
 import tensorflow as tf
-import clr
+import pandas as pd
 
 import i3d
 from lib.action_dataset import Action_Dataset
@@ -25,7 +25,7 @@ _FRAME_SIZE = 224
 _PREFETCH_BUFFER_SIZE = 50
 _NUM_PARALLEL_CALLS = 2
 
-_LOG_ROOT = 'output'
+_LOG_ROOT = 'output_momentum_16_run-01'
 
 _MIX_WEIGHT_OF_RGB = 0.2
 _MIX_WEIGHT_OF_FLOW = 0.8
@@ -73,32 +73,32 @@ _DATA_ROOT = {
 
 
 _CHECKPOINT_PATHS_RGB = [
-    os.path.join('output', 'finetune-clipped_data-rgb-1', 'clipped_data_rgb-50'),
-    os.path.join('output', 'finetune-clipped_data-rgb-2', 'clipped_data_rgb-50'),
-    os.path.join('output', 'finetune-clipped_data-rgb-3', 'clipped_data_rgb-50'),
-    os.path.join('output', 'finetune-clipped_data-rgb-4', 'clipped_data_rgb-50'),
-    os.path.join('output', 'finetune-clipped_data-rgb-5', 'clipped_data_rgb-50'),
-    os.path.join('output', 'finetune-clipped_data-rgb-6', 'clipped_data_rgb-50'),
-    os.path.join('output', 'finetune-clipped_data-rgb-7', 'clipped_data_rgb-50'),
-    os.path.join('output', 'finetune-clipped_data-rgb-8', 'clipped_data_rgb-50'),
-    os.path.join('output', 'finetune-clipped_data-rgb-9', 'clipped_data_rgb-50'),
-    os.path.join('output', 'finetune-clipped_data-rgb-10', 'clipped_data_rgb-50'),
-    os.path.join('output', 'finetune-clipped_data-rgb-11', 'clipped_data_rgb-50'),
-    os.path.join('output', 'finetune-clipped_data-rgb-12', 'clipped_data_rgb-50')
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-rgb-1', 'clipped_data_rgb-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-rgb-2', 'clipped_data_rgb-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-rgb-3', 'clipped_data_rgb-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-rgb-4', 'clipped_data_rgb-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-rgb-5', 'clipped_data_rgb-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-rgb-6', 'clipped_data_rgb-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-rgb-7', 'clipped_data_rgb-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-rgb-8', 'clipped_data_rgb-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-rgb-9', 'clipped_data_rgb-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-rgb-10', 'clipped_data_rgb-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-rgb-11', 'clipped_data_rgb-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-rgb-12', 'clipped_data_rgb-90')
 ]
 _CHECKPOINT_PATHS_FLOW = [
-    os.path.join('output', 'finetune-clipped_data-flow-1', 'clipped_data_flow-50'),
-    os.path.join('output', 'finetune-clipped_data-flow-2', 'clipped_data_flow-50'),
-    os.path.join('output', 'finetune-clipped_data-flow-3', 'clipped_data_flow-50'),
-    os.path.join('output', 'finetune-clipped_data-flow-4', 'clipped_data_flow-50'),
-    os.path.join('output', 'finetune-clipped_data-flow-5', 'clipped_data_flow-50'),
-    os.path.join('output', 'finetune-clipped_data-flow-6', 'clipped_data_flow-50'),
-    os.path.join('output', 'finetune-clipped_data-flow-7', 'clipped_data_flow-50'),
-    os.path.join('output', 'finetune-clipped_data-flow-8', 'clipped_data_flow-50'),
-    os.path.join('output', 'finetune-clipped_data-flow-9', 'clipped_data_flow-50'),
-    os.path.join('output', 'finetune-clipped_data-flow-10', 'clipped_data_flow-50'),
-    os.path.join('output', 'finetune-clipped_data-flow-11', 'clipped_data_flow-50'),
-    os.path.join('output', 'finetune-clipped_data-flow-12', 'clipped_data_flow-50')
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-flow-1', 'clipped_data_flow-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-flow-2', 'clipped_data_flow-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-flow-3', 'clipped_data_flow-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-flow-4', 'clipped_data_flow-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-flow-5', 'clipped_data_flow-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-flow-6', 'clipped_data_flow-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-flow-7', 'clipped_data_flow-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-flow-8', 'clipped_data_flow-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-flow-9', 'clipped_data_flow-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-flow-10', 'clipped_data_flow-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-flow-11', 'clipped_data_flow-90'),
+    os.path.join(_LOG_ROOT, 'finetune-clipped_data-flow-12', 'clipped_data_flow-90')
 ]
 
 def _get_data_label_from_info(rgb_info_tensor, flow_info_tensor, name):
@@ -116,8 +116,7 @@ def process_video(data_info, name, mode, is_training=False):
     if is_training:
         clip_seq, label_seq = data.next_batch(1, _CLIP_SIZE)
     else:
-        clip_seq, label_seq = data.next_batch(
-            1, _CLIP_SIZE, shuffle=False, data_augment=False)
+        clip_seq, label_seq = data.get_element(1, _CLIP_SIZE)
     clip_seq = 2*(clip_seq/255) - 1
     clip_seq = np.array(clip_seq, dtype='float32')
     return clip_seq, label_seq
@@ -125,8 +124,8 @@ def process_video(data_info, name, mode, is_training=False):
 
 def main(dataset='ucf101', mode='mixed', split=1):
     assert mode in ['rgb', 'flow', 'mixed'], 'Only RGB data and flow data is supported'
-    log_dir = os.path.join(_LOG_ROOT, 'test-%s-%s-%d' %
-                           (dataset, mode, split))
+    log_dir = os.path.join(_LOG_ROOT, 'test-%d' %
+                           (split))
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     logging.basicConfig(level=logging.INFO, filename=os.path.join(log_dir, 'log.txt'),
@@ -153,7 +152,9 @@ def main(dataset='ucf101', mode='mixed', split=1):
     num_rgb_sample = len(rgb_test_info)
     num_flow_sample = len(flow_test_info)
     print(num_rgb_sample)
+    print(rgb_data.size)
     print(num_flow_sample)
+    print(flow_data.size)
     
     # Every element in train_info is shown as below:
     # ['v_ApplyEyeMakeup_g08_c01',
@@ -270,8 +271,12 @@ def main(dataset='ucf101', mode='mixed', split=1):
     # for 20 batches
     sess.run(test_init_op)
     
+    rgb_outs = []
+    flow_outs = []
+    labels = []
+    
     for i in range(rgb_data.size):
-        rgb_in_top_1, flow_in_top_1, mixed_in_top_1 = sess.run([rgb_in_top_1_op, flow_in_top_1_op, mixed_in_top_1_op],
+        rgb_in_top_1, flow_in_top_1, mixed_in_top_1, rgb_out, flow_out, label = sess.run([rgb_in_top_1_op, flow_in_top_1_op, mixed_in_top_1_op, rgb_fc_out, flow_fc_out, rgb_label_holder],
                                            feed_dict={dropout_holder: 1,
                                                       is_train_holder: False})
         
@@ -280,12 +285,26 @@ def main(dataset='ucf101', mode='mixed', split=1):
         flow_true_count += np.sum(flow_in_top_1)
         mixed_true_count += np.sum(mixed_in_top_1)
         
+        rgb_outs.append(rgb_out[0])
+        flow_outs.append(flow_out[0])
+        labels.append(label[0])
+        
         print('rgb: %7d   flow: %7d   mixed:%7d   total: %7d/%d' %(rgb_true_count, flow_true_count, mixed_true_count, i, rgb_data.size))
         logging.info('rgb: %7d   flow: %7d   mixed:%7d' %(rgb_true_count, flow_true_count, mixed_true_count))
         
     rgb_accuracy = rgb_true_count / rgb_data.size
     flow_accuracy = flow_true_count / rgb_data.size
     mixed_accuracy = mixed_true_count / rgb_data.size
+    
+    rgb_outs = np.asarray(rgb_outs)
+    flow_outs = np.asarray(flow_outs)
+    labels = np.asarray(labels)
+    
+    result_data = pd.concat([pd.DataFrame(rgb_outs, columns=['r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7', 'r8']),
+                             pd.DataFrame(flow_outs, columns=['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8']), 
+                             pd.DataFrame(labels, columns=['label'])], axis=1)
+    
+    result_data.to_csv(os.path.join(_LOG_ROOT,'result-%d.csv' % (split)))
     
     print('Accuracy:  rgb-%.3f   flow-%.3f   mixed-%.3f' %(rgb_accuracy, flow_accuracy, mixed_accuracy))
     logging.info('Accuracy:  rgb-%.3f   flow-%.3f   mixed-%.3f' %(rgb_accuracy, flow_accuracy, mixed_accuracy))
