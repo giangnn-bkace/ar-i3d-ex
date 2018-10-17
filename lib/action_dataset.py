@@ -47,18 +47,34 @@ class Action_Dataset:
                 label.append(self.videos[self.perm[i]].label)
         return np.stack(batch), np.stack(label)
     
-    def get_element(self, start_frame, frame_num, shuffle=False, data_augment=False):
+    def get_element(self, batch_size, frame_num):
         # used for counting the number of epoches,
         # end is current number of the total processed videos
         # index_in_epoch is the index of this epoch
-        start = start_frame
-        frames = []
+        start = self.index_in_epoch
+        end = start + batch_size
+        self.index_in_epoch = end % self.size
+        batch = []
         label = []
         #print(type(self.mode))
         #print(self.mode)
-        frames.append(self.videos[self.perm[i]].get_frames_at(frame_num, start, data_augment=data_augment))
-        label.append(self.videos[self.perm[i]].label)
-        return np.stack(frames), np.stack(label)
+        if end >= self.size:
+            self.epoch_completed += 1
+            for i in range(start, self.size):
+                # construct batch from start to the size
+                batch.append(
+                    self.videos[self.perm[i]].get_test_frames(frame_num))
+                label.append(self.videos[self.perm[i]].label)
+            for i in range(0, self.index_in_epoch):
+                batch.append(
+                    self.videos[self.perm[i]].get_test_frames(frame_num))
+                label.append(self.videos[self.perm[i]].label)
+        else:
+            for i in range(start, end):
+                batch.append(
+                    self.videos[self.perm[i]].get_test_frames(frame_num))
+                label.append(self.videos[self.perm[i]].label)
+        return np.stack(batch), np.stack(label)
 
 def split_data(data_info, test_split):
     f1 = open(data_info, 'r')

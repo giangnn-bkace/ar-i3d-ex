@@ -29,6 +29,10 @@ class Video_3D:
             self.label = info_list[3]
         else:
             self.label = int(info_list[3])
+        if isinstance(info_list[4], int):
+            self.start = info_list[4]
+        else:
+            self.start = int(info_list[4])
         self.tag = tag
         #img_format offer the standard name of pic
         self.img_format = img_format
@@ -59,26 +63,31 @@ class Video_3D:
 
         return  frames
 
-    def get_frame_at(self, frame_num, start=1, side_length=224):
-        '''
-            return:
-                frame_num * height * width * channel (rgb:3 , flow:2) 
-        '''
+    def get_test_frames(self, frame_num, side_length=224, is_numpy=True):
         #assert frame_num <= self.total_frame_num
-        #print('name: %s %d' % {self.name, start})
         frames = list()
+        start = self.start
+        #combine all frames
         for i in range(start, start+frame_num):
             frames.extend(self.load_img((i-1)%self.total_frame_num+1))
         frames = transform_data(frames, crop_size=side_length, random_crop=False, random_flip=False)
-        frames_np = []
-        if self.tag == 'rgb':
-            for img in frames:
-                frames_np.append(np.asarray(img))
-        elif self.tag == 'flow':
-            for i in range(0, len(frames), 2):
-                tmp = np.stack([np.asarray(frames[i]), np.asarray(frames[i+1])], axis=2)
-                frames_np.append(tmp)
-        return frames_np
+
+        
+        
+#?? what is the meaning of is_numpy
+        if is_numpy:
+            frames_np = []
+            if self.tag == b'rgb':
+                for i, img in enumerate(frames):
+                    frames_np.append(np.asarray(img))
+            elif self.tag == b'flow':
+                for i in range(0, len(frames), 2):
+                    #it is used to combine frame into 2 channels
+                    tmp = np.stack([np.asarray(frames[i]), np.asarray(frames[i+1])], axis=2)
+                    frames_np.append(tmp)
+            return np.stack(frames_np)
+
+        return  frames
         
     def load_img(self, index):
         img_dir = self.path.decode('utf-8')
