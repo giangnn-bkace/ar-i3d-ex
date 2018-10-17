@@ -124,11 +124,10 @@ def process_video(data_info, name, mode, is_training=False):
 
 def main(dataset='ucf101', mode='mixed', split=1):
     assert mode in ['rgb', 'flow', 'mixed'], 'Only RGB data and flow data is supported'
-    log_dir = os.path.join(_LOG_ROOT, 'test-%d' %
-                           (split))
+    log_dir = os.path.join(_LOG_ROOT, 'test')
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
-    logging.basicConfig(level=logging.INFO, filename=os.path.join(log_dir, 'log.txt'),
+    logging.basicConfig(level=logging.INFO, filename=os.path.join(log_dir, 'log-%d.txt' % (split)),
                         filemode='w', format='%(message)s')
 
     ##  Data Preload  ###
@@ -304,7 +303,7 @@ def main(dataset='ucf101', mode='mixed', split=1):
                              pd.DataFrame(flow_outs, columns=['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8']), 
                              pd.DataFrame(labels, columns=['label'])], axis=1)
     
-    result_data.to_csv(os.path.join(_LOG_ROOT,'result-%d.csv' % (split)))
+    result_data.to_csv(os.path.join(_LOG_ROOT,'test','result-%d.csv' % (split)))
     
     print('Accuracy:  rgb-%.3f   flow-%.3f   mixed-%.3f' %(rgb_accuracy, flow_accuracy, mixed_accuracy))
     logging.info('Accuracy:  rgb-%.3f   flow-%.3f   mixed-%.3f' %(rgb_accuracy, flow_accuracy, mixed_accuracy))
