@@ -53,7 +53,7 @@ _SCOPE = {
 _CLASS_NUM = {
     'ucf101': 101,
     'hmdb51': 51,
-    'clipped_data': 8
+    'clipped_data': 400
 }
 
 
@@ -76,7 +76,7 @@ def main():
     v_l = []
     print(len(tf.global_variables()))
     for variable in tf.global_variables():
-        v_l.append(variable.name.replace('R2Plus1D/','')
+        variable_map[variable.name.replace('R2Plus1D/','')
                             .replace('/','_')
                             .replace(':0','')
                             .replace('gamma','s')
@@ -92,9 +92,11 @@ def main():
                             .replace('comp_4_shortcut_projection', 'shortcut_projection_4')
                             .replace('comp_6_shortcut_projection', 'shortcut_projection_6')
                             .replace('kernel', 'w')
-                            .replace('bias', 'b'))
-    for v in sorted(v_l):
-        print(v)
+                            .replace('bias', 'b')] = variable
+    for k, v in sorted(variable_map.items()) :
+        print(k)
+        print(v.shape)
+        print(type(v))
         #tmp = variable.name.split('/')
         #variable_map[variable.name.replace(':0', '')] = variable
         

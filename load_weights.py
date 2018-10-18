@@ -7,6 +7,7 @@ Created on Thu Oct 11 13:16:06 2018
 
 import pickle
 import argparse
+import tensorflow as tf
 
 def load_from_pkl(file_path):
     args_loaded = {}
@@ -19,6 +20,14 @@ def load_from_pkl(file_path):
     
     for k, v in sorted(blobs.items()):
         print(k)
+        if len(v.shape) == 2:
+            v = tf.transpose(v)
+            print(v.shape)
+        elif len(v.shape) == 5:
+            v = tf.transpose(v, perm=[2,3,4,1,0])
+            print(v.shape)
+        else:
+            print(v.shape)
     
     #conv1_w = blobs['conv1_middle_w']
     #print(conv1_w.shape)
