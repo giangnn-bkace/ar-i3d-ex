@@ -26,7 +26,7 @@ _NUM_PARALLEL_CALLS = 2
 _WEIGHT_OF_LOSS_WEIGHT = 7e-7
 _MOMENTUM = 0.9
 _DROPOUT = 0.36
-_LOG_ROOT = 'output_momentum_16_run-01'
+_LOG_ROOT = 'output_r21d_16_run-01'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
@@ -132,6 +132,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     logits_dropout = tf.nn.dropout(logits, dropout_holder)
         # To change 400 classes to the ucf101 or hdmb classes
     fc_out = tf.layers.dense(logits_dropout, _CLASS_NUM[dataset], use_bias=True)
+    #print(fc_out.shape)
         # compute the top-k results for the whole batch size
     is_in_top_1_op = tf.nn.in_top_k(fc_out, label_holder, 1)
 
@@ -216,13 +217,14 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     print("len of blobs %d" % (len(blobs)))
     
     for k, v in sorted(blobs.items()):
-        print('loading -- %s' % (k))
-        if len(v.shape) == 2:
-            sess.run(tf.assign(variable_map[k], tf.transpose(v)))
-        elif len(v.shape) == 5:
-            sess.run(tf.assign(variable_map[k], tf.transpose(v, perm=[2,3,4,1,0])))
-        else:
-            sess.run(tf.assign(variable_map[k], v))
+        if k in variable_map:
+            print('loading -- %s' % (k))
+            if len(v.shape) == 2:
+                sess.run(tf.assign(variable_map[k], tf.transpose(v)))
+            elif len(v.shape) == 5:
+                sess.run(tf.assign(variable_map[k], tf.transpose(v, perm=[2,3,4,1,0])))
+            else:
+                sess.run(tf.assign(variable_map[k], v))
     #saver.restore(sess, _CHECKPOINT_PATHS[train_data.mode+'_imagenet'])
 
     print('----Here we start!----')

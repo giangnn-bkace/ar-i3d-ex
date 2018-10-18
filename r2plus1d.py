@@ -161,6 +161,7 @@ class R2Plus1D(snt.AbstractModule):
         net = R21D_Block(512, 512, name='comp_7')(net, is_training)
         
         #Final layers
+        #print(net.shape)
         net = tf.nn.pool(net,
                          window_shape=[
                                  self._final_temporal_kernel,
@@ -169,9 +170,10 @@ class R2Plus1D(snt.AbstractModule):
                          ],
                          pooling_type="AVG",
                          strides=[1,1,1],
-                         padding='SAME')
+                         padding='VALID')
+        logits = tf.squeeze(net, [2, 3], name='SpatialSqueeze')
+        averaged_logits = tf.reduce_mean(logits, axis=1)
         
-        
-        return net
+        return averaged_logits
         
         
