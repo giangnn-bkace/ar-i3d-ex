@@ -4,6 +4,8 @@ from PIL import ImageOps
 
 
 def transform_data(data, scale_size=256, crop_size=224, random_crop=False, random_flip=False):
+    if crop_size == 112:
+        scale_size = 128
     data = resize(data, scale_size)
     width = data[0].size[0]
     height = data[0].size[1]

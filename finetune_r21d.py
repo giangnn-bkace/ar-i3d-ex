@@ -20,7 +20,7 @@ _BATCH_SIZE = 6
 _CLIP_SIZE = 16
 # How many frames are used for each video in testing phase
 
-_FRAME_SIZE = 224
+_FRAME_SIZE = 112
 _PREFETCH_BUFFER_SIZE = 30
 _NUM_PARALLEL_CALLS = 2
 _WEIGHT_OF_LOSS_WEIGHT = 7e-7
@@ -64,10 +64,10 @@ def process_video(data_info, name, mode, is_training=True):
     """ Get video clip and label from data info list."""
     data = Action_Dataset(name, mode, [data_info])
     if is_training:
-        clip_seq, label_seq = data.next_batch(1, _CLIP_SIZE, shuffle=True, data_augment=True)
+        clip_seq, label_seq = data.next_batch(1, _CLIP_SIZE, shuffle=True, data_augment=True, frame_size=_FRAME_SIZE)
     else:
         clip_seq, label_seq = data.next_batch(
-            1, _CLIP_SIZE, shuffle=False, data_augment=False)
+            1, _CLIP_SIZE, shuffle=False, data_augment=False, frame_size=_FRAME_SIZE)
     clip_seq = 2*(clip_seq/255) - 1
     clip_seq = np.array(clip_seq, dtype='float32')
     return clip_seq, label_seq

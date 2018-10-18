@@ -16,7 +16,7 @@ class Action_Dataset:
         # Edited by Alex Hu
         np.random.shuffle(self.perm)
 
-    def next_batch(self, batch_size, frame_num, shuffle=True, data_augment=True):
+    def next_batch(self, batch_size, frame_num, shuffle=True, data_augment=True, frame_size=224):
         # used for counting the number of epoches,
         # end is current number of the total processed videos
         # index_in_epoch is the index of this epoch
@@ -32,22 +32,22 @@ class Action_Dataset:
             for i in range(start, self.size):
                 # construct batch from start to the size
                 batch.append(
-                    self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment))
+                    self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment, size_length=frame_size))
                 label.append(self.videos[self.perm[i]].label)
             if shuffle:
                 np.random.shuffle(self.perm)
             for i in range(0, self.index_in_epoch):
                 batch.append(
-                    self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment))
+                    self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment, size_length=frame_size))
                 label.append(self.videos[self.perm[i]].label)
         else:
             for i in range(start, end):
                 batch.append(
-                    self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment))
+                    self.videos[self.perm[i]].get_frames(frame_num, data_augment=data_augment, size_length=frame_size))
                 label.append(self.videos[self.perm[i]].label)
         return np.stack(batch), np.stack(label)
     
-    def get_element(self, batch_size, frame_num):
+    def get_element(self, batch_size, frame_num, frame_size=224):
         # used for counting the number of epoches,
         # end is current number of the total processed videos
         # index_in_epoch is the index of this epoch
@@ -63,16 +63,16 @@ class Action_Dataset:
             for i in range(start, self.size):
                 # construct batch from start to the size
                 batch.append(
-                    self.videos[self.perm[i]].get_test_frames(frame_num))
+                    self.videos[self.perm[i]].get_test_frames(frame_num, side_length=frame_size))
                 label.append(self.videos[self.perm[i]].label)
             for i in range(0, self.index_in_epoch):
                 batch.append(
-                    self.videos[self.perm[i]].get_test_frames(frame_num))
+                    self.videos[self.perm[i]].get_test_frames(frame_num, side_length=frame_size))
                 label.append(self.videos[self.perm[i]].label)
         else:
             for i in range(start, end):
                 batch.append(
-                    self.videos[self.perm[i]].get_test_frames(frame_num))
+                    self.videos[self.perm[i]].get_test_frames(frame_num, side_length=frame_size))
                 label.append(self.videos[self.perm[i]].label)
         return np.stack(batch), np.stack(label)
 
