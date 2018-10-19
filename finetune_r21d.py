@@ -16,7 +16,7 @@ import r2plus1d
 from lib.action_dataset import Action_Dataset
 from lib.action_dataset import split_data
 
-_BATCH_SIZE = 6
+_BATCH_SIZE = 3
 _CLIP_SIZE = 16
 # How many frames are used for each video in testing phase
 
@@ -179,7 +179,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     # global step constant
     if mode == 'flow':
         _GLOBAL_EPOCH = 90
-        boundaries = [10000, 20000, 30000, 40000, 50000 ]
+        boundaries = [1000, 2000, 3000, 4000, 5000 ]
         values = [1e-3, 8e-4, 5e-4, 3e-4, 1e-4, 5e-5]
     else:
         _GLOBAL_EPOCH = 90
