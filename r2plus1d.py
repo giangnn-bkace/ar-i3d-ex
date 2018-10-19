@@ -147,18 +147,26 @@ class R2Plus1D(snt.AbstractModule):
         # conv_2x
         net = R21D_Block(64, 64, name='comp_0')(net, is_training)
         net = R21D_Block(64, 64, name='comp_1')(net, is_training)
+        net = R21D_Block(64, 64, name='comp_2')(net, is_training)
         
         # conv_3x
-        net = R21D_Block(64, 128, name='comp_2')(net, is_training)
-        net = R21D_Block(128, 128, name='comp_3')(net, is_training)
+        net = R21D_Block(64, 128, name='comp_3')(net, is_training)
+        net = R21D_Block(128, 128, name='comp_4')(net, is_training)
+        net = R21D_Block(128, 128, name='comp_5')(net, is_training)
+        net = R21D_Block(128, 128, name='comp_6')(net, is_training)
         
         # conv_4x
-        net = R21D_Block(128, 256, name='comp_4')(net, is_training)
-        net = R21D_Block(256, 256, name='comp_5')(net, is_training)
+        net = R21D_Block(128, 256, name='comp_7')(net, is_training)
+        net = R21D_Block(256, 256, name='comp_8')(net, is_training)
+        net = R21D_Block(256, 256, name='comp_9')(net, is_training)
+        net = R21D_Block(256, 256, name='comp_10')(net, is_training)
+        net = R21D_Block(256, 256, name='comp_11')(net, is_training)
+        net = R21D_Block(256, 256, name='comp_12')(net, is_training)
         
         #conv_5x
-        net = R21D_Block(256, 512, name='comp_6')(net, is_training)
-        net = R21D_Block(512, 512, name='comp_7')(net, is_training)
+        net = R21D_Block(256, 512, name='comp_13')(net, is_training)
+        net = R21D_Block(512, 512, name='comp_14')(net, is_training)
+        net = R21D_Block(512, 512, name='comp_15')(net, is_training)
         
         #Final layers
         #print(net.shape)

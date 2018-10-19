@@ -34,7 +34,8 @@ _CHECKPOINT_PATHS = {
     'rgb_imagenet': './data/checkpoints/rgb_imagenet/model.ckpt',
     'flow_imagenet': './data/checkpoints/flow_imagenet/model.ckpt',
     'rgb_kin600': './data/checkpoints/rgb_kin600/model.ckpt',
-    'r21d': './data/checkpoints/r21d/r2.5d_d18_l16.pkl'
+    'r21d_rgb': './data/checkpoints/r21d/r2.5d_d34_l32_ft_sports1m.pkl',
+    'r21d_flow': './data/checkpoints/r21d/r2.5d_d34_l32_ft_sports1m_optical_flow.pkl'
 }
 
 _CHANNEL = {
@@ -152,9 +153,9 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
                             .replace('conv_2_1', '2_conv_1')
                             .replace('_1_spatbn_m', '_spatbn_1_m')
                             .replace('_2_spatbn_m', '_spatbn_2_m')
-                            .replace('comp_2_shortcut_projection', 'shortcut_projection_2')
-                            .replace('comp_4_shortcut_projection', 'shortcut_projection_4')
-                            .replace('comp_6_shortcut_projection', 'shortcut_projection_6')
+                            .replace('comp_3_shortcut_projection', 'shortcut_projection_3')
+                            .replace('comp_7_shortcut_projection', 'shortcut_projection_7')
+                            .replace('comp_13_shortcut_projection', 'shortcut_projection_13')
                             .replace('kernel', 'w')
                             .replace('bias', 'b')] = variable
         if tmp[-1] == 'w:0' or tmp[-1] == 'kernel:0':
@@ -211,7 +212,12 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     sess.run(train_init_op)
     
     # Load pretrained weight
-    with open(_CHECKPOINT_PATHS['r21d'], 'rb') as fopen:
+    if mode == 'rgb':
+        weights_file = _CHECKPOINT_PATHS['r21d_rgb']
+    else:
+        weights_file = _CHECKPOINT_PATHS['r21d_flow']
+        
+    with open(weights_file, 'rb') as fopen:
         blobs = pickle.load(fopen, encoding='latin-1')['blobs']
     
     print("len of blobs %d" % (len(blobs)))
