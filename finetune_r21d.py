@@ -183,7 +183,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
         values = [1e-3, 8e-4, 5e-4, 3e-4, 1e-4, 5e-5]
     else:
         _GLOBAL_EPOCH = 90
-        boundaries = [2000, 4000, 6000, 8000, 10000 ]
+        boundaries = [1000, 2000, 5000, 8000, 10000 ]
         values = [1e-4, 8e-5, 5e-5, 3e-5, 1e-5, 5e-6]
     global_step = _GLOBAL_EPOCH * per_epoch_step
     # global step counting
