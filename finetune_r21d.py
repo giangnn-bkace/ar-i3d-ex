@@ -178,7 +178,7 @@ def main(dataset='clipped_data', mode='rgb', split=1, investigate=0):
     per_epoch_step = int(np.ceil(train_data.size/_BATCH_SIZE))
     # global step constant
     if mode == 'flow':
-        _GLOBAL_EPOCH = 50
+        _GLOBAL_EPOCH = 45
         boundaries = [20000, 30000, 40000, 50000, 60000, 70000 ]
         values = [1e-3, 8e-4, 5e-4, 3e-4, 1e-4, 5e-5, 1e-5]
     else:
