@@ -26,7 +26,7 @@ _NUM_PARALLEL_CALLS = 2
 _WEIGHT_OF_LOSS_WEIGHT = 7e-7
 _MOMENTUM = 0.9
 _DROPOUT = 0.36
-_LOG_ROOT = 'output_r21d_16_run-01'
+_LOG_ROOT = 'output_r21d_16_run-02'
 
 _CHECKPOINT_PATHS = {
     'rgb': './data/checkpoints/rgb_scratch/model.ckpt',
