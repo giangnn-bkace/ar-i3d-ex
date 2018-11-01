@@ -1,0 +1,12 @@
+python test_i3d.py clipped_data mixed 1
+python test_i3d.py clipped_data mixed 2
+python test_i3d.py clipped_data mixed 3
+python test_i3d.py clipped_data mixed 4
+python test_i3d.py clipped_data mixed 5
+python test_i3d.py clipped_data mixed 6
+python test_i3d.py clipped_data mixed 7
+python test_i3d.py clipped_data mixed 8
+python test_i3d.py clipped_data mixed 9
+python test_i3d.py clipped_data mixed 10
+python test_i3d.py clipped_data mixed 11
+python test_i3d.py clipped_data mixed 12
